@@ -1,0 +1,96 @@
+% Title: Greedy Algorithm for the SIS Model
+% Description: Uses the greedy algorithm while implementing the sis model to find the best seeding in the network
+% Authors: Chris Duncan, Kevin Shi, and Fernando Velazquez
+% Date Modified: 7/25/13
+% Status: Complete
+function[MaxIndexOrder] = GreedySIS(Adj, bprob, dprob, group)
+
+InfectedMatrix = zeros(length(Adj), length(Adj));
+for i = 1:length(Adj)
+    InfectedMatrix(i, :) = SISBased1(i, Adj, bprob, dprob, group);
+end
+MaxIndex = 0;
+MaxOfOnes = 0;
+InfectedSetOr = zeros(1, length(Adj));
+MaxIndexSet = zeros(1, length(Adj));
+
+MaxIndexOrder = [];
+for i = 1:length(Adj)
+    for j = 1:length(Adj)
+        if MaxIndexSet(j) ~= 1
+            NewInfectedSetOr = InfectedMatrix(j,:) | InfectedSetOr;
+            NumberOfOnes = sum(NewInfectedSetOr);
+            if NumberOfOnes > MaxOfOnes
+               MaxOfOnes = NumberOfOnes;
+               MaxIndex = j;
+               FinalInfectedSetOr = NewInfectedSetOr;
+            end
+        end
+    end
+    
+    InfectedSetOr = FinalInfectedSetOr;
+    MaxIndexSet(MaxIndex) = 1;
+    MaxIndexOrder = [MaxIndexOrder, MaxIndex];
+    
+    if sum(FinalInfectedSetOr) == length(Adj)
+    break
+    
+    end
+
+end
+end
+
+function[InfectedSet] = SISBased1(s1, Adj, bprob, dprob, group)
+
+A = zeros(1, length(Adj)); 
+A(s1) = 1;
+
+for i = 1:length(Adj)
+	if Adj(i, s1) == 1 
+    	A(i) = 1; %A is an index of the neighbors of infected nodes
+    end
+end
+
+InfectedSet = zeros(1, length(Adj));
+InfectedSet(s1) = 1;
+
+InfectedBase = zeros(1, length(Adj)); 
+
+condition = 1;
+sumInfectedDprob = 0;
+sumInfectedBase = 0;
+j=1;
+
+while condition == 1
+    for i = 1:length(Adj)
+        if A(i) == 1 & i ~= s1
+            if bprob >= rand %applies SIS formula
+               InfectedSet(i) = 1; %infects the node if requirements are met
+            end     
+        end
+    end
+ 
+    for i = 1:length(Adj)
+        if A(i) == 1 & i ~= s1
+            if dprob >= rand %applies SIS formula
+               InfectedSet(i) = 0; %cures the node if requirements are met
+            end     
+        end
+    end
+    
+    sumInfectedDprob = sumInfectedDprob + sum(InfectedSet);
+    
+    j = j + 1;
+    if j == group
+       sumInfectedDprob = sumInfectedDprob / j;
+        
+        if abs(sumInfectedDprob - sumInfectedBase) <= 0.1*sumInfectedBase
+               break
+        else 
+            j = 1;
+            sumInfectedBase = sumInfectedDprob;
+        end
+    end
+end
+
+end
