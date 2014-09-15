@@ -1,0 +1,64 @@
+% Title: Floyd-Warshall algorithm
+% Description: Uses Floyd-Warshall algorithm for Closeness and Betweenness
+% Authors: Chris Duncan, Kevin Shi, and Fernando Velazquez
+% Date Modified: 7/25/13
+% Status: Complete
+function [close, bt] = PinkFloyd(Adj) % This is a function for BOTH closeness and betweenness
+A = length(Adj);
+numbP = zeros(A); % Keep track of paths
+R = zeros(A); % This is a recursive element
+dist = zeros(A); % This records the distance between two nodes
+bt = zeros(1, A);
+close = zeros(1, A);
+for i = 1:A
+    for j = 1:A      
+        if Adj(i, j) == 1
+          R(i, j) = 1; % Sets the shortest path equal to 1
+          numbP(i, j) = 1; % Increments the path counter by 1     
+        else
+            if i == j % For self loops
+                R(i, j) = 0; 
+            else
+                R(i, j) = inf;
+            end
+        end
+    end
+end
+dist = R; % Helps update the distances for the output
+%////////////////////////////////////////////////////////// Recursive Defenition ///////////////////////////////////////////////////////////
+for k = 1:A
+    for i = 1:A
+        for j = 1:A % For all pairs of nodes of length 2 (i to k to j)
+            if i ~= j
+                newP = dist(i, k) + dist(k, j);
+                if newP < dist(i, j)              
+                  R(i, j) = newP; % update shortest path
+                  numbP(i, j) = 1; % reset number of shortest paths to 1
+                end
+                if newP == dist(i, j) % if the alternative path is the same length
+                    numbP(i, j) = numbP(i, j) + 1; % Add 1 to the number of shortest paths
+                end
+            end
+        end
+    end
+end
+dist = R; % Does same thing as above
+%////////////////////////////////////////////////////////////// Closeness ///////////////////////////////////////////////////////////////////////
+for i = 1:A
+    close(i) = sum(dist(i, 1:A))/(A-1); % Equation for closeness
+end
+%///////////////////////////////////////////////////////////// Betweenness ///////////////////////////////////////////////////////////////////
+for k = 1:A
+    for i = 1:A
+        for j = 1:A % Same thing as above
+            if i ~= j
+                if dist(i, k) +dist(k, j) == dist(i, j) % If the path including k is the shortest path from i to j
+                    bt(k) = bt(k) + 1/numbP(i, j);
+                end
+            end
+        end
+    end
+end
+disp(close)
+disp(bt)
+end
