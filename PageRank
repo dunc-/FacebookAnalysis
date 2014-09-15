@@ -1,0 +1,18 @@
+% Title: Page Rank
+% Description: This code analyzes the PageRank of a node from a data set
+% Authors: Chris Duncan, Kevin Shi, and Fernando Velazquez
+% Date Modified: 7/22/13
+% Status: Complete
+function[b] = PageRank(A, beta, alpha)
+% T = zeros(1, length(A)); 
+n = 1434;
+D = diag(sum(A));
+r = ones(n,1);
+x = beta*(eye(n)-alpha*A*D^(-1))^(-1)*r;
+b = sort(x);
+% T(x)=1;
+% for i=1:length(T);
+    % if T(i, x)==1;
+        % T(i)=1;
+end
+end
